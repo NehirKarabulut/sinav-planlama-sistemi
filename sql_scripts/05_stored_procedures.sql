@@ -1,17 +1,5 @@
-/* =========================================================
-   YZM 2126 - Sınav Planlama Sistemi
-   05_stored_procedures.sql
-   Amaç:
-   - Stored Procedure yapılarını oluşturmak
-   - Sınav oluşturma, salon atama, gözetmen atama ve sınav saati güncelleme işlemlerini yapmak
-   ========================================================= */
-
-------------------------------------------------------------
--- 1. SINAV OLUŞTURMA
--- İş Kuralları:
--- - Aynı yarıyıldaki zorunlu dersler aynı tarih/oturumda çakışamaz.
--- - Aynı yarıyıl için aynı güne 2'den fazla sınav varsa uyarı verilir.
-------------------------------------------------------------
+/* sp */
+/*sınav atama*/
 CREATE OR ALTER PROCEDURE dbo.sp_SinavOlustur
     @DersID INT,
     @Tarih DATE,
@@ -36,7 +24,7 @@ BEGIN
         RETURN;
     END
 
-    -- Aynı yarıyıldaki zorunlu derslerin aynı oturuma konulmasını engelle
+    /*zorunlu derslerin aynı oturuma konulmasını engelle*/
     IF EXISTS (
         SELECT 1
         FROM dbo.Sinavlar S
@@ -52,7 +40,7 @@ BEGIN
         RETURN;
     END
 
-    -- Günlük sınav sayısı kontrolü
+    /*günlük sınav sayısı kontrolü*/
     SET @GunlukSinavSayisi = dbo.fn_GunlukSinavSayisi(@Tarih, @Yariyil);
 
     IF @GunlukSinavSayisi >= 2
@@ -90,14 +78,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 2. SALON ATAMA
--- Ek İster:
--- - Transaction yönetimi vardır.
--- - Hata olursa ROLLBACK yapılır.
--- Parametre:
--- - @DerslikIDList = '1,2,3' şeklinde gönderilir.
-------------------------------------------------------------
+/*salon atama*/
 CREATE OR ALTER PROCEDURE dbo.sp_SalonAtamaYap
     @SinavID INT,
     @DerslikIDList NVARCHAR(MAX)
@@ -106,7 +87,7 @@ BEGIN
     SET NOCOUNT ON;
 
     BEGIN TRY
-        BEGIN TRANSACTION;
+        BEGIN TRANSACTION;    /*transaction*/
 
         DECLARE @Tarih DATE;
         DECLARE @OturumID INT;
@@ -126,7 +107,7 @@ BEGIN
             RAISERROR(N'Sınav bulunamadı.', 16, 1);
         END
 
-        -- Seçilen salonların toplam kapasitesi
+        /*seçilen salon toplam kapasite*/
         SELECT @ToplamKapasite = SUM(DL.Kapasite)
         FROM dbo.Derslikler DL
         WHERE DL.DerslikID IN (
@@ -139,7 +120,7 @@ BEGIN
             RAISERROR(N'Seçilen salonların toplam kapasitesi öğrenci sayısından az olamaz.', 16, 1);
         END
 
-        -- Salon çakışması kontrolü
+        /*salon çakışma kontrolü*/
         IF EXISTS (
             SELECT 1
             FROM STRING_SPLIT(@DerslikIDList, ',') X
@@ -155,7 +136,7 @@ BEGIN
             RAISERROR(N'Seçilen salonlardan biri aynı tarih ve oturumda dolu.', 16, 1);
         END
 
-        -- Atamaları ekle
+        /*atama ekle*/
         INSERT INTO dbo.Sinav_Salonlari (SinavID, DerslikID)
         SELECT 
             @SinavID,
@@ -169,7 +150,7 @@ BEGIN
                   AND SS.DerslikID = TRY_CAST(X.value AS INT)
           );
 
-        COMMIT TRANSACTION;
+        COMMIT TRANSACTION;       /*commit*/
 
         SELECT 
             N'Salon atama işlemi başarıyla tamamlandı.' AS Mesaj,
@@ -179,7 +160,7 @@ BEGIN
     END TRY
     BEGIN CATCH
         IF @@TRANCOUNT > 0
-            ROLLBACK TRANSACTION;
+            ROLLBACK TRANSACTION;       /*rollback*/
 
         DECLARE @HataMesaji NVARCHAR(4000);
         SET @HataMesaji = ERROR_MESSAGE();
@@ -189,14 +170,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 3. GÖZETMEN ATAMA
--- Kurallar:
--- - Önce dersin kendi bölümünden uygun gözetmen seçilir.
--- - Yeterli değilse ortak havuzdan seçilir.
--- - Mazeret, zaman çakışması ve ardışık oturum kontrol edilir.
--- - Görev sayısı az olan personele öncelik verilir.
-------------------------------------------------------------
+/*gözetmen atama*/
 CREATE OR ALTER PROCEDURE dbo.sp_GozetmenAta
     @SinavID INT
 AS
@@ -246,7 +220,7 @@ BEGIN
             SET @SecilenPersonelID = NULL;
             SET @AtamaKaynak = NULL;
 
-            -- Önce kendi bölümünden uygun gözetmen seç
+            /*bölüme uygun gözetmen*/
             SELECT TOP 1
                 @SecilenPersonelID = P.PersonelID,
                 @AtamaKaynak = N'Kendi Bölümü'
@@ -257,7 +231,7 @@ BEGIN
               AND dbo.fn_ArdisikOturumUygunMu(P.PersonelID, @Tarih, @OturumID) = 1
             ORDER BY dbo.fn_GozetmenGorevSayisi(P.PersonelID) ASC;
 
-            -- Kendi bölümünden yoksa ortak havuzdan seç
+            /*bölüme uygun yoksa ortak havuzdan*/
             IF @SecilenPersonelID IS NULL
             BEGIN
                 SELECT TOP 1
@@ -313,10 +287,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 4. SINAV SAATİ GÜNCELLEME
--- Log triggerı bu UPDATE işleminden sonra çalışacaktır.
-------------------------------------------------------------
+/*sınav saati güncelleme*/
 CREATE OR ALTER PROCEDURE dbo.sp_SinavSaatiGuncelle
     @SinavID INT,
     @YeniTarih DATE,

@@ -1,17 +1,6 @@
-/* =========================================================
-   YZM 2126 - Sınav Planlama Sistemi
-   06_triggers.sql
-   Amaç:
-   - Trigger yapılarını oluşturmak
-   - Sınav saati değişikliği, salon atama ve gözetmen atama işlemlerini loglamak
-   ========================================================= */
+/* trigger */
 
-------------------------------------------------------------
--- 1. SINAV SAAT DEĞİŞİKLİĞİ LOG TRIGGER'I
--- Ek ister:
--- Yönetici sınav saatini değiştirdiğinde Log tablosuna
--- Eski Saat, Yeni Saat, Değiştiren, Tarih bilgisi düşmelidir.
-------------------------------------------------------------
+/*sınav saati değişikliği triggeri ek ister*/
 CREATE OR ALTER TRIGGER dbo.trg_SinavSaatDegisikligi_Log
 ON dbo.Sinavlar
 AFTER UPDATE
@@ -54,11 +43,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 2. GÖZETMEN ATAMA LOG TRIGGER'I
--- Amaç:
--- Gözetmen ataması eklendiğinde log kaydı oluşturmak.
-------------------------------------------------------------
+/*gözetmen atama triggeri*/
 CREATE OR ALTER TRIGGER dbo.trg_GozetmenAtama_Log
 ON dbo.Gozetmen_Atamalari
 AFTER INSERT
@@ -92,11 +77,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 3. SALON ATAMA LOG TRIGGER'I
--- Amaç:
--- Sınava salon ataması yapıldığında log kaydı oluşturmak.
-------------------------------------------------------------
+/*salon atama triggeri*/
 CREATE OR ALTER TRIGGER dbo.trg_SalonAtama_Log
 ON dbo.Sinav_Salonlari
 AFTER INSERT

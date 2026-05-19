@@ -1,17 +1,6 @@
-/* =========================================================
-   YZM 2126 - Sınav Planlama Sistemi
-   04_functions.sql
-   Amaç:
-   - UDF / User Defined Function yapılarını oluşturmak
-   - Gözetmen, salon, kapasite ve sınav limiti kontrollerini yapmak
-   ========================================================= */
+/* udf */
 
-------------------------------------------------------------
--- 1. GÖZETMEN MÜSAİT Mİ?
--- Kontrol:
--- - Gözetmenin ilgili tarih/oturumda mazereti var mı?
--- - Aynı tarih/oturumda başka salonda görevli mi?
-------------------------------------------------------------
+/* gözetmen müsaitlik durumu*/
 CREATE OR ALTER FUNCTION dbo.fn_GozetmenMusaitMi
 (
     @PersonelID INT,
@@ -56,11 +45,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 2. GÖZETMEN ARDIŞIK OTURUM UYGUN MU?
--- Kural:
--- Bir gözetmen arka arkaya en fazla 3 oturumda görev alabilir.
-------------------------------------------------------------
+/* ardışık oturum uygun mu*/
 CREATE OR ALTER FUNCTION dbo.fn_ArdisikOturumUygunMu
 (
     @PersonelID INT,
@@ -92,11 +77,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 3. GÖZETMEN GÖREV SAYISI
--- Amaç:
--- Adil dağıtım için personelin toplam görev sayısını döndürür.
-------------------------------------------------------------
+/*görev sayısı*/
 CREATE OR ALTER FUNCTION dbo.fn_GozetmenGorevSayisi
 (
     @PersonelID INT
@@ -114,11 +95,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 4. SALON MÜSAİT Mİ?
--- Kontrol:
--- Aynı derslikte aynı tarih ve oturumda başka sınav var mı?
-------------------------------------------------------------
+/* salon müsaitlik durumu*/
 CREATE OR ALTER FUNCTION dbo.fn_SalonMusaitMi
 (
     @DerslikID INT,
@@ -147,11 +124,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 5. TOPLAM SALON KAPASİTESİ
--- Amaç:
--- Bir sınava atanmış salonların toplam kapasitesini verir.
-------------------------------------------------------------
+/* salon kapasite*/
 CREATE OR ALTER FUNCTION dbo.fn_ToplamSalonKapasitesi
 (
     @SinavID INT
@@ -171,11 +144,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 6. GÜNLÜK SINAV SAYISI
--- Kural:
--- Aynı yarıyıl için aynı güne 2'den fazla sınav varsa uyarı verilir.
-------------------------------------------------------------
+/* günlük sınav sayısı*/
 CREATE OR ALTER FUNCTION dbo.fn_GunlukSinavSayisi
 (
     @Tarih DATE,
@@ -197,9 +166,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 7. FUNCTION TEST SORGULARI
-------------------------------------------------------------
+/* test sorguları*/
 
 -- Gözetmen müsaitlik testi
 SELECT dbo.fn_GozetmenMusaitMi(1, '2026-05-20', 1) AS GozetmenMusaitMi;

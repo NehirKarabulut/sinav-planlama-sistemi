@@ -1,14 +1,6 @@
-/* =========================================================
-   YZM 2126 - Sınav Planlama Sistemi
-   03_views.sql
-   Amaç:
-   - Raporlama için VIEW yapıları oluşturmak
-   - Uygulama tarafında çağrılacak rapor view'larını hazırlamak
-   ========================================================= */
+/* views*/
 
-------------------------------------------------------------
--- 1. SINAV PROGRAMI VIEW
-------------------------------------------------------------
+/*SinavProgrami*/
 CREATE OR ALTER VIEW dbo.vw_SinavProgrami
 AS
 SELECT
@@ -51,9 +43,7 @@ LEFT JOIN dbo.Personel P
     ON GA.PersonelID = P.PersonelID;
 GO
 
-------------------------------------------------------------
--- 2. GOZETMEN GOREV DAGILIMI VIEW
-------------------------------------------------------------
+/*GozetmenGorevDagilimi*/
 CREATE OR ALTER VIEW dbo.vw_GozetmenGorevDagilimi
 AS
 SELECT
@@ -77,9 +67,7 @@ GROUP BY
     B.BolumAdi;
 GO
 
-------------------------------------------------------------
--- 3. DERSLIK KULLANIM RAPORU VIEW
-------------------------------------------------------------
+/*DerslikKullanimRaporu*/
 CREATE OR ALTER VIEW dbo.vw_DerslikKullanimRaporu
 AS
 SELECT
@@ -102,9 +90,7 @@ GROUP BY
     DL.Aktif;
 GO
 
-------------------------------------------------------------
--- 4. BOLUM SINAV YOGUNLUGU VIEW
-------------------------------------------------------------
+/*BolumSinavYogunlugu*/
 CREATE OR ALTER VIEW dbo.vw_BolumSinavYogunlugu
 AS
 SELECT
@@ -129,9 +115,7 @@ GROUP BY
     S.Tarih;
 GO
 
-------------------------------------------------------------
--- 5. VIEW KONTROL SORGULARI
-------------------------------------------------------------
+/*kontrol sorguları*/
 SELECT * FROM dbo.vw_SinavProgrami;
 SELECT * FROM dbo.vw_GozetmenGorevDagilimi;
 SELECT * FROM dbo.vw_DerslikKullanimRaporu;

@@ -1,15 +1,6 @@
-/* =========================================================
-   YZM 2126 - Sınav Planlama Sistemi
-   09_test_queries.sql
-   Amaç:
-   - Tüm SQL isterlerini test etmek
-   - Table, View, Function, Stored Procedure, Trigger, Log,
-     Transaction, Security ve Backup kontrollerini yapmak
-   ========================================================= */
+/* isterlerin testleri */
 
-------------------------------------------------------------
--- 1. TEMEL TABLO KONTROLLERİ
-------------------------------------------------------------
+/* tablo kontrolleri*/
 SELECT * FROM dbo.Bolumler;
 SELECT * FROM dbo.Dersler;
 SELECT * FROM dbo.Oturumlar;
@@ -22,107 +13,89 @@ SELECT * FROM dbo.Gozetmen_Atamalari;
 SELECT * FROM dbo.Loglar;
 GO
 
-------------------------------------------------------------
--- 2. VIEW TESTLERİ
--- En az 3 view isteri için kontrol
-------------------------------------------------------------
+/*view testleri*/
 SELECT * FROM dbo.vw_SinavProgrami;
 SELECT * FROM dbo.vw_GozetmenGorevDagilimi;
 SELECT * FROM dbo.vw_DerslikKullanimRaporu;
 SELECT * FROM dbo.vw_BolumSinavYogunlugu;
 GO
 
-------------------------------------------------------------
--- 3. FUNCTION / UDF TESTLERİ
--- En az 3 UDF isteri için kontrol
-------------------------------------------------------------
+/*udf testleri*/
 
--- Gözetmen müsait mi?
+--gözetmen müsait mi
 SELECT dbo.fn_GozetmenMusaitMi(1, '2026-05-20', 1) AS GozetmenMusaitMi;
 GO
 
--- Gözetmen ardışık oturum kuralına uygun mu?
+--ardışık oturum
 SELECT dbo.fn_ArdisikOturumUygunMu(1, '2026-05-20', 4) AS ArdisikOturumUygunMu;
 GO
 
--- Gözetmenin görev sayısı kaç?
+--görev sayısı
 SELECT dbo.fn_GozetmenGorevSayisi(1) AS GozetmenGorevSayisi;
 GO
 
--- Salon müsait mi?
+--salon boş mu
 SELECT dbo.fn_SalonMusaitMi(1, '2026-05-20', 1) AS SalonMusaitMi;
 GO
 
--- Sınava atanmış salonların toplam kapasitesi
+--toplam kapasite
 SELECT dbo.fn_ToplamSalonKapasitesi(1) AS ToplamSalonKapasitesi;
 GO
 
--- Aynı yarıyıl için günlük sınav sayısı
+--aynı dönemdeki günlük sınav sayısı
 SELECT dbo.fn_GunlukSinavSayisi('2026-05-20', 4) AS GunlukSinavSayisi;
 GO
 
-------------------------------------------------------------
--- 4. STORED PROCEDURE TESTLERİ
--- En az 3 SP isteri için kontrol
-------------------------------------------------------------
+/* sp testleri*/
 
--- 4.1 Yeni sınav oluşturma testi
--- Not: Eğer aynı kayıt varsa unique constraint nedeniyle ekleme yapmayabilir.
+--yeni sınav oluşturma 
 EXEC dbo.sp_SinavOlustur
     @DersID = 2,
     @Tarih = '2026-05-21',
     @OturumID = 2;
 GO
 
--- 4.2 Salon atama testi
--- Bu işlem transaction içerir.
+--salon atama
 EXEC dbo.sp_SalonAtamaYap
     @SinavID = 1,
     @DerslikIDList = '1,2';
 GO
 
--- 4.3 Gözetmen atama testi
+--gözetmen atama
 EXEC dbo.sp_GozetmenAta
     @SinavID = 1;
 GO
 
--- 4.4 Sınav saati güncelleme testi
--- Bu işlem trigger ile Loglar tablosuna kayıt düşürmelidir.
+--sınav saati güncelleme 
 EXEC dbo.sp_SinavSaatiGuncelle
     @SinavID = 1,
     @YeniTarih = '2026-05-20',
     @YeniOturumID = 2;
 GO
 
-------------------------------------------------------------
--- 5. TRIGGER / LOG TESTLERİ
-------------------------------------------------------------
+/*trigger testleri*/
 
--- Sınav saati değişikliği log kaydı oluştu mu?
+--sınav saati değişikliği log kaydı
 SELECT * 
 FROM dbo.Loglar
 ORDER BY LogID DESC;
 GO
 
--- Gözetmen atama logları oluştu mu?
+--gözetmen atama logları
 SELECT *
 FROM dbo.Loglar
 WHERE TabloAdi = N'Gozetmen_Atamalari'
 ORDER BY LogID DESC;
 GO
 
--- Salon atama logları oluştu mu?
+--salon atama logları
 SELECT *
 FROM dbo.Loglar
 WHERE TabloAdi = N'Sinav_Salonlari'
 ORDER BY LogID DESC;
 GO
 
-------------------------------------------------------------
--- 6. TRANSACTION / ROLLBACK TESTİ
--- Bilerek kapasitesi yetersiz salon seçilerek hata alınması beklenir.
--- Hata olursa sp_SalonAtamaYap içinde ROLLBACK çalışmalıdır.
-------------------------------------------------------------
+/*transaction testleri*/
 
 -- Bu test hata verebilir, bu normaldir.
 -- Çünkü Lab-1 kapasitesi 30, YZM2126 öğrenci sayısı 132.
@@ -139,10 +112,7 @@ BEGIN CATCH
 END CATCH;
 GO
 
-------------------------------------------------------------
--- 7. GÜVENLİK TESTLERİ
--- App_Admin ve App_Viewer yetkileri kontrol edilir.
-------------------------------------------------------------
+/*güvenlik testleri*/
 
 -- App_Admin tüm tablolarda SELECT yapabilmeli.
 EXECUTE AS USER = 'App_Admin';

@@ -1,15 +1,6 @@
-/* =========================================================
-   YZM 2126 - Sınav Planlama Sistemi
-   01_create_tables.sql
-   Amaç:
-   - Temel tabloları oluşturmak
-   - PK / FK / UNIQUE / CHECK / DEFAULT kurallarını eklemek
-   - Log tablosunu hazırlamak
-   ========================================================= */
+/* tablo oluşturma */
 
-------------------------------------------------------------
--- 1. BOLUMLER
-------------------------------------------------------------
+/*bölümler*/
 IF OBJECT_ID('dbo.Bolumler', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.Bolumler (
@@ -22,9 +13,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 2. DERSLER
-------------------------------------------------------------
+/*dersler*/
 IF OBJECT_ID('dbo.Dersler', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.Dersler (
@@ -53,9 +42,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 3. OTURUMLAR
-------------------------------------------------------------
+/*oturumlar*/
 IF OBJECT_ID('dbo.Oturumlar', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.Oturumlar (
@@ -72,9 +59,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 4. DERSLIKLER
-------------------------------------------------------------
+/*derslikler*/
 IF OBJECT_ID('dbo.Derslikler', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.Derslikler (
@@ -96,9 +81,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 5. PERSONEL
-------------------------------------------------------------
+/*personel*/
 IF OBJECT_ID('dbo.Personel', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.Personel (
@@ -115,10 +98,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 6. PERSONEL_DURUM
--- Gözetmenin izinli / danışmanlık / mazeretli olduğu zamanlar
-------------------------------------------------------------
+/*personel durum izinli mi değil mi*/
 IF OBJECT_ID('dbo.Personel_Durum', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.Personel_Durum (
@@ -141,9 +121,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 7. SINAVLAR
-------------------------------------------------------------
+/*sınavlar*/
 IF OBJECT_ID('dbo.Sinavlar', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.Sinavlar (
@@ -164,10 +142,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 8. SINAV_SALONLARI
--- Bir sınav birden fazla derslikte yapılabilir.
-------------------------------------------------------------
+/*sınav salonu bir sınav birden fazla salonda olabilir*/
 IF OBJECT_ID('dbo.Sinav_Salonlari', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.Sinav_Salonlari (
@@ -187,10 +162,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 9. GOZETMEN_ATAMALARI
--- Bir sınav salonuna gözetmen atanır.
-------------------------------------------------------------
+/*gözetmen atama*/
 IF OBJECT_ID('dbo.Gozetmen_Atamalari', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.Gozetmen_Atamalari (
@@ -214,9 +186,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 10. LOG KAYITLARI
-------------------------------------------------------------
+/*log*/
 IF OBJECT_ID('dbo.Loglar', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.Loglar (

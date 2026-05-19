@@ -1,14 +1,6 @@
-/* =========================================================
-   YZM 2126 - Sınav Planlama Sistemi
-   02_insert_sample_data.sql
-   Amaç:
-   - Test için örnek veri eklemek
-   - SP, UDF, View ve Trigger testlerine zemin hazırlamak
-   ========================================================= */
+/* test için örnek veri */
 
-------------------------------------------------------------
--- 1. BOLUMLER
-------------------------------------------------------------
+/* bölümler*/
 IF NOT EXISTS (SELECT 1 FROM dbo.Bolumler WHERE BolumAdi = N'Yazılım Mühendisliği')
 BEGIN
     INSERT INTO dbo.Bolumler (BolumAdi, Fakulte)
@@ -28,9 +20,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 2. OTURUMLAR
-------------------------------------------------------------
+/* oturumlar */
 IF NOT EXISTS (SELECT 1 FROM dbo.Oturumlar WHERE Tanim = N'Oturum 1')
 BEGIN
     INSERT INTO dbo.Oturumlar (Tanim, BaslangicSaat, BitisSaat)
@@ -62,9 +52,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 3. DERSLIKLER
-------------------------------------------------------------
+/* derslikler*/
 IF NOT EXISTS (SELECT 1 FROM dbo.Derslikler WHERE Ad = N'Amfi-1')
 BEGIN
     INSERT INTO dbo.Derslikler (Ad, Kapasite, Tip, Kat, Aktif)
@@ -96,9 +84,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 4. DERSLER
-------------------------------------------------------------
+/* dersler */
 DECLARE @YazilimBolumID INT;
 DECLARE @BilgisayarBolumID INT;
 DECLARE @ElektrikBolumID INT;
@@ -156,9 +142,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 5. PERSONEL
-------------------------------------------------------------
+/* personel */
 DECLARE @YazilimID INT;
 DECLARE @BilgisayarID INT;
 DECLARE @ElektrikID INT;
@@ -221,10 +205,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 6. PERSONEL_DURUM
--- Ayşe Demir 20 Mayıs 2026 Oturum 2'de uygun değil.
-------------------------------------------------------------
+/* personel durum */
 DECLARE @AyseID INT;
 DECLARE @Oturum2ID INT;
 
@@ -251,9 +232,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 7. ORNEK SINAV
-------------------------------------------------------------
+/* örnek sınav */
 DECLARE @DersID INT;
 DECLARE @OturumID INT;
 
@@ -278,9 +257,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 8. ORNEK SALON ATAMALARI
-------------------------------------------------------------
+/* örnek salon atama */
 DECLARE @SinavID INT;
 DECLARE @AmfiID INT;
 DECLARE @Z04ID INT;
@@ -322,9 +299,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 9. ORNEK GOZETMEN ATAMALARI
-------------------------------------------------------------
+/* örnek gözetmen atama*/
 DECLARE @SalonAtama1 INT;
 DECLARE @SalonAtama2 INT;
 DECLARE @AysePersonelID INT;
@@ -375,9 +350,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 10. KONTROL
-------------------------------------------------------------
+/* kontrol */
 SELECT * FROM dbo.Bolumler;
 SELECT * FROM dbo.Dersler;
 SELECT * FROM dbo.Oturumlar;

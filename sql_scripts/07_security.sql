@@ -1,24 +1,7 @@
-/* =========================================================
-   YZM 2126 - Sınav Planlama Sistemi
-   07_security.sql
-   Amaç:
-   - App_Admin ve App_Viewer kullanıcılarını oluşturmak
-   - GRANT / REVOKE / DENY işlemlerini yapmak
-   - Role-Based Security isterini karşılamak
-   ========================================================= */
+/* role based security grant deny revoke*/
 
-------------------------------------------------------------
--- NOT:
--- Bu script SQL Server üzerinde çalıştırılacaktır.
--- Login oluşturma işlemi master seviyesinde yapılır.
--- User ve yetki işlemleri proje database'i içinde yapılır.
---
--- Eğer login zaten varsa hata almamak için önce kontrol edilir.
-------------------------------------------------------------
 
-------------------------------------------------------------
--- 1. LOGIN OLUŞTURMA
-------------------------------------------------------------
+/*login oluşturma*/
 
 IF NOT EXISTS (
     SELECT 1 
@@ -44,9 +27,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 2. DATABASE USER OLUŞTURMA
-------------------------------------------------------------
+/* db user oluşturma*/
 
 IF NOT EXISTS (
     SELECT 1 
@@ -68,10 +49,7 @@ BEGIN
 END
 GO
 
-------------------------------------------------------------
--- 3. APP_ADMIN YETKİLERİ
--- Yönetici tüm tablolarda okuma/yazma yapabilir.
-------------------------------------------------------------
+/*yönetici her tabloya okuma yazma yapabilir*/
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON dbo.Bolumler TO App_Admin;
 GRANT SELECT, INSERT, UPDATE, DELETE ON dbo.Dersler TO App_Admin;
@@ -85,9 +63,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON dbo.Gozetmen_Atamalari TO App_Admin;
 GRANT SELECT, INSERT, UPDATE, DELETE ON dbo.Loglar TO App_Admin;
 GO
 
-------------------------------------------------------------
--- 4. APP_ADMIN PROCEDURE ÇALIŞTIRMA YETKİLERİ
-------------------------------------------------------------
+/*sp çalıştırma yetkileri*/
 
 GRANT EXECUTE ON dbo.sp_SinavOlustur TO App_Admin;
 GRANT EXECUTE ON dbo.sp_SalonAtamaYap TO App_Admin;
@@ -95,10 +71,7 @@ GRANT EXECUTE ON dbo.sp_GozetmenAta TO App_Admin;
 GRANT EXECUTE ON dbo.sp_SinavSaatiGuncelle TO App_Admin;
 GO
 
-------------------------------------------------------------
--- 5. APP_VIEWER YETKİLERİ
--- Gözetmen / izleyici sadece rapor view'larını görebilir.
-------------------------------------------------------------
+/*view yetkileri*/
 
 GRANT SELECT ON dbo.vw_SinavProgrami TO App_Viewer;
 GRANT SELECT ON dbo.vw_GozetmenGorevDagilimi TO App_Viewer;
@@ -106,10 +79,7 @@ GRANT SELECT ON dbo.vw_DerslikKullanimRaporu TO App_Viewer;
 GRANT SELECT ON dbo.vw_BolumSinavYogunlugu TO App_Viewer;
 GO
 
-------------------------------------------------------------
--- 6. APP_VIEWER TABLO YAZMA YETKİLERİNİ ENGELLEME
--- DENY, GRANT'ten daha güçlüdür.
-------------------------------------------------------------
+/*tablo yazma yetkileri engelleme*/
 
 DENY INSERT, UPDATE, DELETE ON dbo.Bolumler TO App_Viewer;
 DENY INSERT, UPDATE, DELETE ON dbo.Dersler TO App_Viewer;
@@ -123,10 +93,7 @@ DENY INSERT, UPDATE, DELETE ON dbo.Gozetmen_Atamalari TO App_Viewer;
 DENY INSERT, UPDATE, DELETE ON dbo.Loglar TO App_Viewer;
 GO
 
-------------------------------------------------------------
--- 7. APP_VIEWER TABLOLARA DOĞRUDAN SELECT ATMASIN
--- Sadece view üzerinden rapor görsün.
-------------------------------------------------------------
+/*doğrudan select atama yok rapordan görsün*/
 
 DENY SELECT ON dbo.Bolumler TO App_Viewer;
 DENY SELECT ON dbo.Dersler TO App_Viewer;
@@ -140,12 +107,7 @@ DENY SELECT ON dbo.Gozetmen_Atamalari TO App_Viewer;
 DENY SELECT ON dbo.Loglar TO App_Viewer;
 GO
 
-------------------------------------------------------------
--- 8. REVOKE ÖRNEĞİ
--- Proje isterinde REVOKE de geçtiği için örnek olarak kullanıyoruz.
--- App_Viewer'a yanlışlıkla verilen genel EXECUTE yetkisi varsa geri alınır.
-------------------------------------------------------------
-
+/* yanlışlıkla verilen execute yetkisi geri alınır*/
 REVOKE EXECUTE TO App_Viewer;
 GO
 

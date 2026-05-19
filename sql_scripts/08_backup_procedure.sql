@@ -1,4 +1,4 @@
-/* bonus ister backupdatabase sp haline getirme*/
+/*/* bonus ister backupdatabase sp haline getirme*/
 
 CREATE OR ALTER PROCEDURE dbo.sp_VeritabaniYedekAl
 AS
@@ -73,4 +73,4 @@ GO
 -- EXEC dbo.sp_VeritabaniYedekAl;
 
 -- SELECT * FROM dbo.Loglar ORDER BY LogID DESC;
-GO 
+GO */

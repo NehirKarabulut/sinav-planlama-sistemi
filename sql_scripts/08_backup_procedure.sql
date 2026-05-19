@@ -1,21 +1,4 @@
-/*/* =========================================================
-   YZM 2126 - Sınav Planlama Sistemi
-   08_backup_procedure.sql
-   Amaç:
-   - BONUS isterini karşılamak
-   - BACKUP DATABASE komutunu Stored Procedure haline getirmek
-   - Arayüzden / backend'den çağrılabilir hale getirmek
-   ========================================================= */
-
-------------------------------------------------------------
--- NOT:
--- Bu işlem SQL Server'ın çalıştığı Windows makinede dosya oluşturur.
--- Örnek yol: C:\Yedekler
---
--- Bu klasör SQL Server servis hesabı tarafından yazılabilir olmalıdır.
--- Eğer yetki hatası alınırsa C:\Yedekler klasörü oluşturulmalı
--- ve SQL Server servis hesabına yazma izni verilmelidir.
-------------------------------------------------------------
+/* bonus ister backupdatabase sp haline getirme*/
 
 CREATE OR ALTER PROCEDURE dbo.sp_VeritabaniYedekAl
 AS
@@ -90,4 +73,4 @@ GO
 -- EXEC dbo.sp_VeritabaniYedekAl;
 
 -- SELECT * FROM dbo.Loglar ORDER BY LogID DESC;
-GO */
+GO 

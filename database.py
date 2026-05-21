@@ -1,55 +1,48 @@
-import os
-from dotenv import load_dotenv
+import pyodbc
 
-load_dotenv()
+import pyodbc
 
-USE_MOCK = os.getenv("USE_MOCK", "true").lower() == "true"
+def get_sql_connection():
+    """Yerel SQL Server (SSMS) veritabanına CANLI ve GERÇEK bağlantı açar."""
+    server = r'LAPTOP-FMLI53KJ'
+    database = 'SinavPlanlamaDB'
+    
+    conn_str = (
+        f'DRIVER={{SQL Server}};'
+        f'SERVER={server};'
+        f'DATABASE={database};'
+        f'Trusted_Connection=yes;'
+    )
+    try:
+        return pyodbc.connect(conn_str)
+    except Exception as e:
+        print(f"\n❌ [CRITICAL DATABASE ERROR]: {e}\n")
+        return None
 
-DB_SERVER = os.getenv("DB_SERVER")
-DB_NAME = os.getenv("DB_NAME")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_PORT = os.getenv("DB_PORT", "1433")
-DB_ROLE = os.getenv("DB_ROLE", "admin")
-
+def get_connection_info():
+    return {"server": r"LAPTOP-FMLI53KJ", "database": "SinavPlanlamaDB"}
 
 def is_mock_mode():
-    """
-    Uygulamanın mock veriyle mi yoksa gerçek DB ile mi çalışacağını döndürür.
-    """
-    return USE_MOCK
+    return False
+    
+    conn_str = (
+        f'DRIVER={{SQL Server}};'
+        f'SERVER={server};'
+        f'DATABASE={database};'
+        f'Trusted_Connection=yes;'
+    )
+    try:
+        return pyodbc.connect(conn_str)
+    except Exception as e:
+        print(f"Veritabanına bağlanırken hata oluştu: {e}")
+        return None
+
 
 
 def get_connection_info():
-    """
-    DB bağlantı durumunu gösterir.
-    """
-    return {
-        "use_mock": USE_MOCK,
-        "server": DB_SERVER,
-        "database": DB_NAME,
-        "user": DB_USER,
-        "port": DB_PORT,
-        "role": DB_ROLE,
-        "status": (
-            "Mock mod aktif. Backend mock verilerle çalışıyor."
-            if USE_MOCK
-            else "DB modu aktif. Gerçek SQL Server bağlantısı kullanılacak."
-        )
-    }
+    """Eski koddaki import hatasını engellemek için bağlantı bilgisini döner."""
+    return {"server": r"LAPTOP-FMLI53KJ\OMEN", "database": "SinavPlanlamaDB"}
 
-
-def get_sql_connection():
-    """
-    DB hazır olunca aktif kullanılacak bağlantı fonksiyonu.
-
-    DB moduna geçince:
-    1. pip install pyodbc
-    2. Mac'e ODBC Driver 18 kurulacak
-    3. Bu fonksiyon aktif edilecek
-    """
-
-    if USE_MOCK:
-        raise RuntimeError("Mock mod aktifken gerçek SQL bağlantısı açılamaz.")
-
-    raise NotImplementedError("DB bağlantısı henüz aktif edilmedi.")
+def is_mock_mode():
+    """Artık canlı modda olduğumuz için her zaman False döner."""
+    return False

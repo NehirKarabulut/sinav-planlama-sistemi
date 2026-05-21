@@ -1,75 +1,83 @@
 """
 sql_service.py
-
-Bu dosya DB hazır olduğunda SQL Server işlemlerini yönetecek.
-Şu an mock moddayız, bu yüzden fonksiyonlar gerçek DB bağlantısı açmıyor.
-
-DB hazır olunca:
-- SELECT sorguları
-- Stored Procedure çağrıları
-- View çağrıları
-- UDF çağrıları
-- Log sorguları
-buradan yönetilecek.
+Bu dosya SQL Server işlemlerini CANLI olarak yönetir.
 """
 
 from database import get_sql_connection
 
 
 def fetch_all(query: str, params: tuple = ()):
-    """
-    SELECT sorguları için kullanılacak.
-
-    Örnek:
-    fetch_all("SELECT * FROM dbo.Dersler")
-    """
-    raise NotImplementedError("DB hazır olunca SELECT sorguları burada çalışacak.")
+    """SELECT sorguları ve View'lar için kullanılır."""
+    conn = get_sql_connection()
+    if not conn:
+        return []
+    try:
+        cursor = conn.cursor()
+        cursor.execute(query, params)
+        # Sütun isimlerini alıp sözlük (dict) yapısına çeviriyoruz (FastAPI için)
+        columns = [column[0] for column in cursor.description]
+        results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return results
+    except Exception as e:
+        print(f"SQL Fetch Hatası: {e}")
+        # Boş liste dönmek yerine hatayı yukarı fırlatıyoruz ki Swagger'da ne olduğunu görelim!
+        raise Exception(f"Veritabanından Veri Çekilemedi: {str(e)}")
+    finally:
+        conn.close()
 
 
 def execute_command(query: str, params: tuple = ()):
-    """
-    INSERT / UPDATE / DELETE sorguları için kullanılacak.
-    """
-    raise NotImplementedError("DB hazır olunca komut sorguları burada çalışacak.")
+    """INSERT / UPDATE / DELETE komut sorguları için kullanılır."""
+    conn = get_sql_connection()
+    if not conn:
+        return False
+    try:
+        cursor = conn.cursor()
+        cursor.execute(query, params)
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"SQL Komut Hatası: {e}")
+        raise Exception(f"SQL Motoru Hatası: {str(e)}")
+    finally:
+        conn.close()
 
 
 def execute_stored_procedure(procedure_name: str, params: tuple = ()):
-    """
-    Stored Procedure çağırmak için kullanılacak.
-
-    Örnek:
-    execute_stored_procedure(
-        "dbo.sp_SinavOlustur",
-        (ders_id, tarih, oturum_id)
-    )
-    """
-    raise NotImplementedError("DB hazır olunca Stored Procedure çağrıları burada çalışacak.")
-
-
-def execute_scalar_function(function_query: str, params: tuple = ()):
-    """
-    UDF / Function çağırmak için kullanılacak.
-
-    Örnek:
-    SELECT dbo.fn_GozetmenMusaitMi(?, ?, ?)
-    """
-    raise NotImplementedError("DB hazır olunca UDF çağrıları burada çalışacak.")
-
+    """Stored Procedure çağırmak için kullanılır."""
+    conn = get_sql_connection()
+    if not conn:
+        return False
+    try:
+        cursor = conn.cursor()
+        # SQL Server için EXEC komutunu parametre adeti kadar '?' ile dinamik oluşturuyoruz
+        param_placeholders = ", ".join(["?"] * len(params))
+        sql_query = f"EXEC {procedure_name} {param_placeholders}"
+        
+        cursor.execute(sql_query, params)
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"SQL Procedure Hatası: {e}")
+        return False
+    finally:
+        conn.close()
 
 def fetch_view(view_name: str):
+    """View'dan veri çekmek için kullanılır. Tip uyuşmazlığını önlemek için verileri metin olarak çeker."""
+    # Sütunları tek tek string (VARCHAR) formatına cast ederek çekiyoruz
+    query = """
+        SELECT 
+            CAST(SinavID AS VARCHAR(50)) AS sinav_id,
+            CAST(Tarih AS VARCHAR(50)) AS tarih,
+            CAST(Oturum AS VARCHAR(50)) AS oturum,
+            CAST(SaatAraligi AS VARCHAR(50)) AS saat_araligi,
+            CAST(DersKodu AS VARCHAR(50)) AS ders_kodu,
+            CAST(DersAdi AS VARCHAR(250)) AS ders,
+            CAST(Derslik AS VARCHAR(50)) AS derslikler,
+            CAST(Kapasite AS VARCHAR(50)) AS kapasite,
+            CAST(Gozetmen AS VARCHAR(250)) AS gozetmenler,
+            CAST(AtamaKaynak AS VARCHAR(100)) AS atama_kaynak
+        FROM dbo.vw_SinavProgrami WITH (NOLOCK)
     """
-    View çağırmak için kullanılacak.
-
-    Örnek:
-    fetch_view("dbo.vw_SinavProgrami")
-    """
-    query = f"SELECT * FROM {view_name}"
-    raise NotImplementedError(f"DB hazır olunca şu view çağrılacak: {query}")
-
-
-def call_backup_procedure():
-    """
-    Bonus ister içindir.
-    Şu an 08_backup_procedure.sql pasif olduğu için çalıştırılmayacak.
-    """
-    raise NotImplementedError("Backup procedure şu an pasif. Sonra aktif edilecek.")
+    return fetch_all(query)

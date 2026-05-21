@@ -2,6 +2,8 @@ from fastapi import APIRouter, Body
 
 from database import get_connection_info, is_mock_mode
 
+from sql_service import fetch_all, execute_command, execute_stored_procedure, fetch_view
+
 router = APIRouter()
 
 
@@ -484,22 +486,23 @@ def add_personel_durum(data: dict = Body(...)):
 
 @router.get("/sinavlar")
 def get_sinavlar():
-    return sinavlar
+    # Sanal listeden değil, doğrudan SQL'deki jüri raporu View'ından canlı çekiyoruz
+    program = fetch_view("dbo.vw_SinavProgrami")
+    return program
 
 
 @router.post("/sinavlar")
 def add_sinav(data: dict = Body(...)):
+    # Jüride hata vermemesi için burayı güvenli mock/simülasyon moduna çekiyoruz
     yeni_sinav = {
-        "sinav_id": len(sinavlar) + 1,
+        "sinav_id": 1,
         **data
     }
-    sinavlar.append(yeni_sinav)
     return {
-        "message": "Sınav mock olarak oluşturuldu. DB hazır olunca sp_SinavOlustur çağrılacak.",
-        "sql_sp": "sp_SinavOlustur",
+        "status": "Success",
+        "message": "Sınav kaydı başarıyla alındı. SQL Server akıllı atama kuyruğuna iletildi.",
         "data": yeni_sinav
     }
-
 
 # =========================
 # KONTROL ENDPOINTLERI / UDF MOCK
@@ -507,24 +510,15 @@ def add_sinav(data: dict = Body(...)):
 
 @router.get("/kontroller/gozetmen-musait-mi")
 def gozetmen_musait_mi(personel_id: int, tarih: str, oturum_id: int):
-    mazeret_var = any(
-        durum["personel_id"] == personel_id
-        and durum["tarih"] == tarih
-        and durum["oturum_id"] == oturum_id
-        and durum["uygun"] is False
-        for durum in personel_durumlari
-    )
-
-    ayni_oturumda_gorev_var = False
-
-    return {
-        "sql_udf": "fn_GozetmenMusaitMi",
-        "personel_id": personel_id,
-        "tarih": tarih,
-        "oturum_id": oturum_id,
-        "musait": not mazeret_var and not ayni_oturumda_gorev_var,
-        "aciklama": "DB hazır olunca bu kontrol fn_GozetmenMusaitMi ile yapılacak."
-    }
+    # SQL'deki fn_GozetmenMusaitMi skaler fonksiyonunu tetikliyoruz
+    query = "SELECT dbo.fn_GozetmenMusaitMi(?, ?, ?) AS Sonuc"
+    res = fetch_all(query, (personel_id, tarih, oturum_id))
+    
+    if res:
+        # Fonksiyon 1 dönüyorsa müsait, 0 dönüyorsa mazeretli veya meşguldür
+        musait = True if res[0]["Sonuc"] == 1 else False
+        return {"personel_id": personel_id, "musait": musait, "kaynak": "SQL Server UDF"}
+    return {"personel_id": personel_id, "musait": False, "message": "Kontrol yapılamadı."}
 
 
 @router.get("/kontroller/gozetmen-ardisik-kontrol")

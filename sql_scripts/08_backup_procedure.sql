@@ -1,4 +1,4 @@
-/*/* bonus ister backupdatabase sp haline getirme*/
+/*bonus ister backupdatabase sp haline getirme*/
 
 CREATE OR ALTER PROCEDURE dbo.sp_VeritabaniYedekAl
 AS
@@ -65,6 +65,7 @@ BEGIN
         @FileName AS BackupFilePath;
 END
 GO
+/*
 
 ------------------------------------------------------------
 -- TEST ÇAĞRISI
